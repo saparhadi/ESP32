@@ -1,0 +1,138 @@
+<pre>
+<font color="#5e6d03">#include</font> <font color="#434f54">&lt;</font><b><font color="#d35400">WiFi</font></b><font color="#434f54">.</font><font color="#000000">h</font><font color="#434f54">&gt;</font>
+<font color="#5e6d03">#include</font> <font color="#434f54">&lt;</font><b><font color="#d35400">WebServer</font></b><font color="#434f54">.</font><font color="#000000">h</font><font color="#434f54">&gt;</font>
+
+<font color="#95a5a6">&#47;* Put your SSID &amp; Password *&#47;</font>
+<font color="#00979c">const</font> <font color="#00979c">char</font><font color="#434f54">*</font> <font color="#000000">ssid</font> <font color="#434f54">=</font> <font color="#005c5f">&#34;Wifi Gratis&#34;</font><font color="#000000">;</font> &nbsp;<font color="#434f54">&#47;&#47; Enter SSID here</font>
+<font color="#00979c">const</font> <font color="#00979c">char</font><font color="#434f54">*</font> <font color="#000000">password</font> <font color="#434f54">=</font> <font color="#005c5f">&#34;tapibohong&#34;</font><font color="#000000">;</font> &nbsp;<font color="#434f54">&#47;&#47;Enter Password here</font>
+
+<font color="#95a5a6">&#47;* Put IP Address details *&#47;</font>
+<b><font color="#d35400">IPAddress</font></b> <font color="#000000">local_ip</font><font color="#000000">(</font><font color="#000000">192</font><font color="#434f54">,</font> <font color="#000000">168</font><font color="#434f54">,</font> <font color="#000000">100</font><font color="#434f54">,</font> <font color="#000000">33</font><font color="#000000">)</font><font color="#000000">;</font>
+<b><font color="#d35400">IPAddress</font></b> <font color="#000000">gateway</font><font color="#000000">(</font><font color="#000000">192</font><font color="#434f54">,</font> <font color="#000000">168</font><font color="#434f54">,</font> <font color="#000000">100</font><font color="#434f54">,</font> <font color="#000000">1</font><font color="#000000">)</font><font color="#000000">;</font>
+<b><font color="#d35400">IPAddress</font></b> <font color="#000000">subnet</font><font color="#000000">(</font><font color="#000000">255</font><font color="#434f54">,</font> <font color="#000000">255</font><font color="#434f54">,</font> <font color="#000000">255</font><font color="#434f54">,</font> <font color="#000000">0</font><font color="#000000">)</font><font color="#000000">;</font>
+
+<b><font color="#d35400">WebServer</font></b> <font color="#000000">server</font><font color="#000000">(</font><font color="#000000">80</font><font color="#000000">)</font><font color="#000000">;</font>
+
+<font color="#00979c">uint8_t</font> <font color="#000000">LED1pin</font> <font color="#434f54">=</font> <font color="#000000">22</font><font color="#000000">;</font>
+<font color="#00979c">bool</font> <font color="#000000">LED1status</font> <font color="#434f54">=</font> <font color="#00979c">LOW</font><font color="#000000">;</font>
+
+<font color="#00979c">uint8_t</font> <font color="#000000">LED2pin</font> <font color="#434f54">=</font> <font color="#000000">23</font><font color="#000000">;</font>
+<font color="#00979c">bool</font> <font color="#000000">LED2status</font> <font color="#434f54">=</font> <font color="#00979c">LOW</font><font color="#000000">;</font>
+
+<font color="#00979c">void</font> <font color="#5e6d03">setup</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">begin</font><font color="#000000">(</font><font color="#000000">115200</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#d35400">pinMode</font><font color="#000000">(</font><font color="#000000">LED1pin</font><font color="#434f54">,</font> <font color="#00979c">OUTPUT</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#d35400">pinMode</font><font color="#000000">(</font><font color="#000000">LED2pin</font><font color="#434f54">,</font> <font color="#00979c">OUTPUT</font><font color="#000000">)</font><font color="#000000">;</font>
+
+ &nbsp;<b><font color="#d35400">WiFi</font></b><font color="#434f54">.</font><font color="#d35400">softAP</font><font color="#000000">(</font><font color="#000000">ssid</font><font color="#434f54">,</font> <font color="#000000">password</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<b><font color="#d35400">WiFi</font></b><font color="#434f54">.</font><font color="#d35400">softAPConfig</font><font color="#000000">(</font><font color="#000000">local_ip</font><font color="#434f54">,</font> <font color="#000000">gateway</font><font color="#434f54">,</font> <font color="#000000">subnet</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">100</font><font color="#000000">)</font><font color="#000000">;</font>
+
+ &nbsp;<font color="#000000">server</font><font color="#434f54">.</font><font color="#d35400">on</font><font color="#000000">(</font><font color="#005c5f">&#34;&#47;&#34;</font><font color="#434f54">,</font> <font color="#000000">handle_OnConnect</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">server</font><font color="#434f54">.</font><font color="#d35400">on</font><font color="#000000">(</font><font color="#005c5f">&#34;&#47;led1on&#34;</font><font color="#434f54">,</font> <font color="#000000">handle_led1on</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">server</font><font color="#434f54">.</font><font color="#d35400">on</font><font color="#000000">(</font><font color="#005c5f">&#34;&#47;led1off&#34;</font><font color="#434f54">,</font> <font color="#000000">handle_led1off</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">server</font><font color="#434f54">.</font><font color="#d35400">on</font><font color="#000000">(</font><font color="#005c5f">&#34;&#47;led2on&#34;</font><font color="#434f54">,</font> <font color="#000000">handle_led2on</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">server</font><font color="#434f54">.</font><font color="#d35400">on</font><font color="#000000">(</font><font color="#005c5f">&#34;&#47;led2off&#34;</font><font color="#434f54">,</font> <font color="#000000">handle_led2off</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">server</font><font color="#434f54">.</font><font color="#d35400">onNotFound</font><font color="#000000">(</font><font color="#000000">handle_NotFound</font><font color="#000000">)</font><font color="#000000">;</font>
+
+ &nbsp;<font color="#000000">server</font><font color="#434f54">.</font><font color="#d35400">begin</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;HTTP server started&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+<font color="#000000">}</font>
+<font color="#00979c">void</font> <font color="#5e6d03">loop</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;<font color="#000000">server</font><font color="#434f54">.</font><font color="#d35400">handleClient</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">LED1status</font><font color="#000000">)</font>
+ &nbsp;<font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;<font color="#d35400">digitalWrite</font><font color="#000000">(</font><font color="#000000">LED1pin</font><font color="#434f54">,</font> <font color="#00979c">HIGH</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">}</font>
+ &nbsp;<font color="#5e6d03">else</font>
+ &nbsp;<font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;<font color="#d35400">digitalWrite</font><font color="#000000">(</font><font color="#000000">LED1pin</font><font color="#434f54">,</font> <font color="#00979c">LOW</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">}</font>
+
+ &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">LED2status</font><font color="#000000">)</font>
+ &nbsp;<font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;<font color="#d35400">digitalWrite</font><font color="#000000">(</font><font color="#000000">LED2pin</font><font color="#434f54">,</font> <font color="#00979c">HIGH</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">}</font>
+ &nbsp;<font color="#5e6d03">else</font>
+ &nbsp;<font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;<font color="#d35400">digitalWrite</font><font color="#000000">(</font><font color="#000000">LED2pin</font><font color="#434f54">,</font> <font color="#00979c">LOW</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">}</font>
+<font color="#000000">}</font>
+
+<font color="#00979c">void</font> <font color="#000000">handle_OnConnect</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;<font color="#000000">LED1status</font> <font color="#434f54">=</font> <font color="#00979c">LOW</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">LED2status</font> <font color="#434f54">=</font> <font color="#00979c">LOW</font><font color="#000000">;</font>
+ &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;GPIO4 Status: OFF | GPIO5 Status: OFF&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">server</font><font color="#434f54">.</font><font color="#d35400">send</font><font color="#000000">(</font><font color="#000000">200</font><font color="#434f54">,</font> <font color="#005c5f">&#34;text&#47;html&#34;</font><font color="#434f54">,</font> <font color="#000000">SendHTML</font><font color="#000000">(</font><font color="#000000">LED1status</font><font color="#434f54">,</font> <font color="#000000">LED2status</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">;</font>
+<font color="#000000">}</font>
+
+<font color="#00979c">void</font> <font color="#000000">handle_led1on</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;<font color="#000000">LED1status</font> <font color="#434f54">=</font> <font color="#00979c">HIGH</font><font color="#000000">;</font>
+ &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;GPIO4 Status: ON&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">server</font><font color="#434f54">.</font><font color="#d35400">send</font><font color="#000000">(</font><font color="#000000">200</font><font color="#434f54">,</font> <font color="#005c5f">&#34;text&#47;html&#34;</font><font color="#434f54">,</font> <font color="#000000">SendHTML</font><font color="#000000">(</font><font color="#00979c">true</font><font color="#434f54">,</font> <font color="#000000">LED2status</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">;</font>
+<font color="#000000">}</font>
+
+<font color="#00979c">void</font> <font color="#000000">handle_led1off</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;<font color="#000000">LED1status</font> <font color="#434f54">=</font> <font color="#00979c">LOW</font><font color="#000000">;</font>
+ &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;GPIO4 Status: OFF&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">server</font><font color="#434f54">.</font><font color="#d35400">send</font><font color="#000000">(</font><font color="#000000">200</font><font color="#434f54">,</font> <font color="#005c5f">&#34;text&#47;html&#34;</font><font color="#434f54">,</font> <font color="#000000">SendHTML</font><font color="#000000">(</font><font color="#00979c">false</font><font color="#434f54">,</font> <font color="#000000">LED2status</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">;</font>
+<font color="#000000">}</font>
+
+<font color="#00979c">void</font> <font color="#000000">handle_led2on</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;<font color="#000000">LED2status</font> <font color="#434f54">=</font> <font color="#00979c">HIGH</font><font color="#000000">;</font>
+ &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;GPIO5 Status: ON&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">server</font><font color="#434f54">.</font><font color="#d35400">send</font><font color="#000000">(</font><font color="#000000">200</font><font color="#434f54">,</font> <font color="#005c5f">&#34;text&#47;html&#34;</font><font color="#434f54">,</font> <font color="#000000">SendHTML</font><font color="#000000">(</font><font color="#000000">LED1status</font><font color="#434f54">,</font> <font color="#00979c">true</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">;</font>
+<font color="#000000">}</font>
+
+<font color="#00979c">void</font> <font color="#000000">handle_led2off</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;<font color="#000000">LED2status</font> <font color="#434f54">=</font> <font color="#00979c">LOW</font><font color="#000000">;</font>
+ &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;GPIO5 Status: OFF&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">server</font><font color="#434f54">.</font><font color="#d35400">send</font><font color="#000000">(</font><font color="#000000">200</font><font color="#434f54">,</font> <font color="#005c5f">&#34;text&#47;html&#34;</font><font color="#434f54">,</font> <font color="#000000">SendHTML</font><font color="#000000">(</font><font color="#000000">LED1status</font><font color="#434f54">,</font> <font color="#00979c">false</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">;</font>
+<font color="#000000">}</font>
+
+<font color="#00979c">void</font> <font color="#000000">handle_NotFound</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;<font color="#000000">server</font><font color="#434f54">.</font><font color="#d35400">send</font><font color="#000000">(</font><font color="#000000">404</font><font color="#434f54">,</font> <font color="#005c5f">&#34;text&#47;plain&#34;</font><font color="#434f54">,</font> <font color="#005c5f">&#34;Not found&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+<font color="#000000">}</font>
+
+<font color="#00979c">String</font> <font color="#000000">SendHTML</font><font color="#000000">(</font><font color="#00979c">uint8_t</font> <font color="#000000">led1stat</font><font color="#434f54">,</font> <font color="#00979c">uint8_t</font> <font color="#000000">led2stat</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;<font color="#00979c">String</font> <font color="#000000">ptr</font> <font color="#434f54">=</font> <font color="#005c5f">&#34;&lt;!DOCTYPE html&gt; &lt;html&gt;\n&#34;</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">ptr</font> <font color="#434f54">+=</font> <font color="#005c5f">&#34;&lt;head&gt;&lt;meta name=\&#34;viewport\&#34; content=\&#34;width=device-width, initial-scale=1.0, user-scalable=no\&#34;&gt;\n&#34;</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">ptr</font> <font color="#434f54">+=</font> <font color="#005c5f">&#34;&lt;title&gt;LED Control&lt;&#47;title&gt;\n&#34;</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">ptr</font> <font color="#434f54">+=</font> <font color="#005c5f">&#34;&lt;style&gt;html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}\n&#34;</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">ptr</font> <font color="#434f54">+=</font> <font color="#005c5f">&#34;body{margin-top: 50px;} h1 {color: #444444;margin: 50px auto 30px;} h3 {color: #444444;margin-bottom: 50px;}\n&#34;</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">ptr</font> <font color="#434f54">+=</font> <font color="#005c5f">&#34;.button {display: block;width: 80px;background-color: #3498db;border: none;color: white;padding: 13px 30px;text-decoration: none;font-size: 25px;margin: 0px auto 35px;cursor: pointer;border-radius: 4px;}\n&#34;</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">ptr</font> <font color="#434f54">+=</font> <font color="#005c5f">&#34;.button-on {background-color: #3498db;}\n&#34;</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">ptr</font> <font color="#434f54">+=</font> <font color="#005c5f">&#34;.button-on:active {background-color: #2980b9;}\n&#34;</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">ptr</font> <font color="#434f54">+=</font> <font color="#005c5f">&#34;.button-off {background-color: #34495e;}\n&#34;</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">ptr</font> <font color="#434f54">+=</font> <font color="#005c5f">&#34;.button-off:active {background-color: #2c3e50;}\n&#34;</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">ptr</font> <font color="#434f54">+=</font> <font color="#005c5f">&#34;p {font-size: 14px;color: #888;margin-bottom: 10px;}\n&#34;</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">ptr</font> <font color="#434f54">+=</font> <font color="#005c5f">&#34;&lt;&#47;style&gt;\n&#34;</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">ptr</font> <font color="#434f54">+=</font> <font color="#005c5f">&#34;&lt;&#47;head&gt;\n&#34;</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">ptr</font> <font color="#434f54">+=</font> <font color="#005c5f">&#34;&lt;body&gt;\n&#34;</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">ptr</font> <font color="#434f54">+=</font> <font color="#005c5f">&#34;&lt;h1&gt;ESP32 Web Server&lt;&#47;h1&gt;\n&#34;</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">ptr</font> <font color="#434f54">+=</font> <font color="#005c5f">&#34;&lt;h3&gt;Using Access Point(AP) Mode&lt;&#47;h3&gt;\n&#34;</font><font color="#000000">;</font>
+
+ &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">led1stat</font><font color="#000000">)</font>
+ &nbsp;<font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;<font color="#000000">ptr</font> <font color="#434f54">+=</font> <font color="#005c5f">&#34;&lt;p&gt;LED1 Status: ON&lt;&#47;p&gt;&lt;a class=\&#34;button button-off\&#34; href=\&#34;&#47;led1off\&#34;&gt;OFF&lt;&#47;a&gt;\n&#34;</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">}</font>
+ &nbsp;<font color="#5e6d03">else</font>
+ &nbsp;<font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;<font color="#000000">ptr</font> <font color="#434f54">+=</font> <font color="#005c5f">&#34;&lt;p&gt;LED1 Status: OFF&lt;&#47;p&gt;&lt;a class=\&#34;button button-on\&#34; href=\&#34;&#47;led1on\&#34;&gt;ON&lt;&#47;a&gt;\n&#34;</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">}</font>
+
+ &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">led2stat</font><font color="#000000">)</font>
+ &nbsp;<font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;<font color="#000000">ptr</font> <font color="#434f54">+=</font> <font color="#005c5f">&#34;&lt;p&gt;LED2 Status: ON&lt;&#47;p&gt;&lt;a class=\&#34;button button-off\&#34; href=\&#34;&#47;led2off\&#34;&gt;OFF&lt;&#47;a&gt;\n&#34;</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">}</font>
+ &nbsp;<font color="#5e6d03">else</font>
+ &nbsp;<font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;<font color="#000000">ptr</font> <font color="#434f54">+=</font> <font color="#005c5f">&#34;&lt;p&gt;LED2 Status: OFF&lt;&#47;p&gt;&lt;a class=\&#34;button button-on\&#34; href=\&#34;&#47;led2on\&#34;&gt;ON&lt;&#47;a&gt;\n&#34;</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">}</font>
+
+ &nbsp;<font color="#000000">ptr</font> <font color="#434f54">+=</font> <font color="#005c5f">&#34;&lt;&#47;body&gt;\n&#34;</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">ptr</font> <font color="#434f54">+=</font> <font color="#005c5f">&#34;&lt;&#47;html&gt;\n&#34;</font><font color="#000000">;</font>
+ &nbsp;<font color="#5e6d03">return</font> <font color="#000000">ptr</font><font color="#000000">;</font>
+<font color="#000000">}</font>
+
+</pre>

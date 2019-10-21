@@ -1,0 +1,163 @@
+<pre>
+<font color="#95a5a6">&#47;**</font>
+<font color="#95a5a6"> * A BLE client example that is rich in capabilities.</font>
+<font color="#95a5a6"> * There is a lot new capabilities implemented.</font>
+<font color="#95a5a6"> * author unknown</font>
+<font color="#95a5a6"> * updated by chegewara</font>
+<font color="#95a5a6"> *&#47;</font>
+
+<font color="#5e6d03">#include</font> <font color="#005c5f">&#34;BLEDevice.h&#34;</font>
+<font color="#434f54">&#47;&#47;#include &#34;BLEScan.h&#34;</font>
+
+<font color="#434f54">&#47;&#47; The remote service we wish to connect to.</font>
+<font color="#00979c">static</font> <font color="#000000">BLEUUID</font> <font color="#000000">serviceUUID</font><font color="#000000">(</font><font color="#005c5f">&#34;4fafc201-1fb5-459e-8fcc-c5c9c331914b&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+<font color="#434f54">&#47;&#47; The characteristic of the remote service we are interested in.</font>
+<font color="#00979c">static</font> <font color="#000000">BLEUUID</font> &nbsp;&nbsp;&nbsp;<font color="#000000">charUUID</font><font color="#000000">(</font><font color="#005c5f">&#34;beb5483e-36e1-4688-b7f5-ea07361b26a8&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+
+<font color="#00979c">static</font> <font color="#00979c">boolean</font> <font color="#000000">doConnect</font> <font color="#434f54">=</font> <font color="#00979c">false</font><font color="#000000">;</font>
+<font color="#00979c">static</font> <font color="#00979c">boolean</font> <font color="#d35400">connected</font> <font color="#434f54">=</font> <font color="#00979c">false</font><font color="#000000">;</font>
+<font color="#00979c">static</font> <font color="#00979c">boolean</font> <font color="#000000">doScan</font> <font color="#434f54">=</font> <font color="#00979c">false</font><font color="#000000">;</font>
+<font color="#00979c">static</font> <font color="#000000">BLERemoteCharacteristic</font><font color="#434f54">*</font> <font color="#000000">pRemoteCharacteristic</font><font color="#000000">;</font>
+<font color="#00979c">static</font> <font color="#000000">BLEAdvertisedDevice</font><font color="#434f54">*</font> <font color="#000000">myDevice</font><font color="#000000">;</font>
+
+<font color="#00979c">static</font> <font color="#00979c">void</font> <font color="#000000">notifyCallback</font><font color="#000000">(</font>
+ &nbsp;<font color="#000000">BLERemoteCharacteristic</font><font color="#434f54">*</font> <font color="#000000">pBLERemoteCharacteristic</font><font color="#434f54">,</font>
+ &nbsp;<font color="#00979c">uint8_t</font><font color="#434f54">*</font> <font color="#000000">pData</font><font color="#434f54">,</font>
+ &nbsp;<b><font color="#d35400">size_t</font></b> <font color="#d35400">length</font><font color="#434f54">,</font>
+ &nbsp;<font color="#00979c">bool</font> <font color="#000000">isNotify</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">print</font><font color="#000000">(</font><font color="#005c5f">&#34;Notify callback for characteristic &#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">print</font><font color="#000000">(</font><font color="#000000">pBLERemoteCharacteristic</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">getUUID</font><font color="#000000">(</font><font color="#000000">)</font><font color="#434f54">.</font><font color="#000000">toString</font><font color="#000000">(</font><font color="#000000">)</font><font color="#434f54">.</font><font color="#000000">c_str</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">print</font><font color="#000000">(</font><font color="#005c5f">&#34; of data length &#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#d35400">length</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">print</font><font color="#000000">(</font><font color="#005c5f">&#34;data: &#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#000000">(</font><font color="#00979c">char</font><font color="#434f54">*</font><font color="#000000">)</font><font color="#000000">pData</font><font color="#000000">)</font><font color="#000000">;</font>
+<font color="#000000">}</font>
+
+<font color="#00979c">class</font> <font color="#000000">MyClientCallback</font> <font color="#434f54">:</font> <font color="#00979c">public</font> <font color="#000000">BLEClientCallbacks</font> <font color="#000000">{</font>
+ &nbsp;<font color="#00979c">void</font> <font color="#000000">onConnect</font><font color="#000000">(</font><font color="#000000">BLEClient</font><font color="#434f54">*</font> <font color="#000000">pclient</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;<font color="#000000">}</font>
+
+ &nbsp;<font color="#00979c">void</font> <font color="#000000">onDisconnect</font><font color="#000000">(</font><font color="#000000">BLEClient</font><font color="#434f54">*</font> <font color="#000000">pclient</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;<font color="#d35400">connected</font> <font color="#434f54">=</font> <font color="#00979c">false</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;onDisconnect&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">}</font>
+<font color="#000000">}</font><font color="#000000">;</font>
+
+<font color="#00979c">bool</font> <font color="#000000">connectToServer</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">print</font><font color="#000000">(</font><font color="#005c5f">&#34;Forming a connection to &#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#000000">myDevice</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#d35400">getAddress</font><font color="#000000">(</font><font color="#000000">)</font><font color="#434f54">.</font><font color="#000000">toString</font><font color="#000000">(</font><font color="#000000">)</font><font color="#434f54">.</font><font color="#000000">c_str</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;
+ &nbsp;&nbsp;&nbsp;<font color="#000000">BLEClient</font><font color="#434f54">*</font> &nbsp;<font color="#000000">pClient</font> &nbsp;<font color="#434f54">=</font> <font color="#000000">BLEDevice</font><font color="#434f54">:</font><font color="#434f54">:</font><font color="#000000">createClient</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34; - Created client&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+
+ &nbsp;&nbsp;&nbsp;<font color="#000000">pClient</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">setClientCallbacks</font><font color="#000000">(</font><font color="#00979c">new</font> <font color="#000000">MyClientCallback</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">;</font>
+
+ &nbsp;&nbsp;&nbsp;<font color="#434f54">&#47;&#47; Connect to the remove BLE Server.</font>
+ &nbsp;&nbsp;&nbsp;<font color="#000000">pClient</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#d35400">connect</font><font color="#000000">(</font><font color="#000000">myDevice</font><font color="#000000">)</font><font color="#000000">;</font> &nbsp;<font color="#434f54">&#47;&#47; if you pass BLEAdvertisedDevice instead of address, it will be recognized type of peer device address (public or private)</font>
+ &nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34; - Connected to server&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+
+ &nbsp;&nbsp;&nbsp;<font color="#434f54">&#47;&#47; Obtain a reference to the service we are after in the remote BLE server.</font>
+ &nbsp;&nbsp;&nbsp;<font color="#000000">BLERemoteService</font><font color="#434f54">*</font> <font color="#000000">pRemoteService</font> <font color="#434f54">=</font> <font color="#000000">pClient</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">getService</font><font color="#000000">(</font><font color="#000000">serviceUUID</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">pRemoteService</font> <font color="#434f54">==</font> <font color="#000000">nullptr</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">print</font><font color="#000000">(</font><font color="#005c5f">&#34;Failed to find our service UUID: &#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#000000">serviceUUID</font><font color="#434f54">.</font><font color="#000000">toString</font><font color="#000000">(</font><font color="#000000">)</font><font color="#434f54">.</font><font color="#000000">c_str</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">pClient</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#d35400">disconnect</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#5e6d03">return</font> <font color="#00979c">false</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<font color="#000000">}</font>
+ &nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34; - Found our service&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+
+
+ &nbsp;&nbsp;&nbsp;<font color="#434f54">&#47;&#47; Obtain a reference to the characteristic in the service of the remote BLE server.</font>
+ &nbsp;&nbsp;&nbsp;<font color="#000000">pRemoteCharacteristic</font> <font color="#434f54">=</font> <font color="#000000">pRemoteService</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">getCharacteristic</font><font color="#000000">(</font><font color="#000000">charUUID</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">pRemoteCharacteristic</font> <font color="#434f54">==</font> <font color="#000000">nullptr</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">print</font><font color="#000000">(</font><font color="#005c5f">&#34;Failed to find our characteristic UUID: &#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#000000">charUUID</font><font color="#434f54">.</font><font color="#000000">toString</font><font color="#000000">(</font><font color="#000000">)</font><font color="#434f54">.</font><font color="#000000">c_str</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">pClient</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#d35400">disconnect</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#5e6d03">return</font> <font color="#00979c">false</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<font color="#000000">}</font>
+ &nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34; - Found our characteristic&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+
+ &nbsp;&nbsp;&nbsp;<font color="#434f54">&#47;&#47; Read the value of the characteristic.</font>
+ &nbsp;&nbsp;&nbsp;<font color="#5e6d03">if</font><font color="#000000">(</font><font color="#000000">pRemoteCharacteristic</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">canRead</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">std</font><font color="#434f54">:</font><font color="#434f54">:</font><font color="#000000">string</font> <font color="#d35400">value</font> <font color="#434f54">=</font> <font color="#000000">pRemoteCharacteristic</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">readValue</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">print</font><font color="#000000">(</font><font color="#005c5f">&#34;The characteristic value was: &#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#d35400">value</font><font color="#434f54">.</font><font color="#000000">c_str</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<font color="#000000">}</font>
+
+ &nbsp;&nbsp;&nbsp;<font color="#5e6d03">if</font><font color="#000000">(</font><font color="#000000">pRemoteCharacteristic</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">canNotify</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">)</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">pRemoteCharacteristic</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">registerForNotify</font><font color="#000000">(</font><font color="#000000">notifyCallback</font><font color="#000000">)</font><font color="#000000">;</font>
+
+ &nbsp;&nbsp;&nbsp;<font color="#d35400">connected</font> <font color="#434f54">=</font> <font color="#00979c">true</font><font color="#000000">;</font>
+<font color="#000000">}</font>
+<font color="#95a5a6">&#47;**</font>
+<font color="#95a5a6"> * Scan for BLE servers and find the first one that advertises the service we are looking for.</font>
+<font color="#95a5a6"> *&#47;</font>
+<font color="#00979c">class</font> <font color="#000000">MyAdvertisedDeviceCallbacks</font><font color="#434f54">:</font> <font color="#00979c">public</font> <font color="#000000">BLEAdvertisedDeviceCallbacks</font> <font color="#000000">{</font>
+ <font color="#95a5a6">&#47;**</font>
+<font color="#95a5a6"> &nbsp;&nbsp;* Called for each advertising BLE server.</font>
+<font color="#95a5a6"> &nbsp;&nbsp;*&#47;</font>
+ &nbsp;<font color="#00979c">void</font> <font color="#000000">onResult</font><font color="#000000">(</font><font color="#000000">BLEAdvertisedDevice</font> <font color="#000000">advertisedDevice</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">print</font><font color="#000000">(</font><font color="#005c5f">&#34;BLE Advertised Device found: &#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#000000">advertisedDevice</font><font color="#434f54">.</font><font color="#000000">toString</font><font color="#000000">(</font><font color="#000000">)</font><font color="#434f54">.</font><font color="#000000">c_str</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">;</font>
+
+ &nbsp;&nbsp;&nbsp;<font color="#434f54">&#47;&#47; We have found a device, let us now see if it contains the service we are looking for.</font>
+ &nbsp;&nbsp;&nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">advertisedDevice</font><font color="#434f54">.</font><font color="#000000">haveServiceUUID</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#434f54">&amp;&amp;</font> <font color="#000000">advertisedDevice</font><font color="#434f54">.</font><font color="#000000">isAdvertisingService</font><font color="#000000">(</font><font color="#000000">serviceUUID</font><font color="#000000">)</font><font color="#000000">)</font> <font color="#000000">{</font>
+
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">BLEDevice</font><font color="#434f54">:</font><font color="#434f54">:</font><font color="#000000">getScan</font><font color="#000000">(</font><font color="#000000">)</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#d35400">stop</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">myDevice</font> <font color="#434f54">=</font> <font color="#00979c">new</font> <font color="#000000">BLEAdvertisedDevice</font><font color="#000000">(</font><font color="#000000">advertisedDevice</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">doConnect</font> <font color="#434f54">=</font> <font color="#00979c">true</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">doScan</font> <font color="#434f54">=</font> <font color="#00979c">true</font><font color="#000000">;</font>
+
+ &nbsp;&nbsp;&nbsp;<font color="#000000">}</font> <font color="#434f54">&#47;&#47; Found our server</font>
+ &nbsp;<font color="#000000">}</font> <font color="#434f54">&#47;&#47; onResult</font>
+<font color="#000000">}</font><font color="#000000">;</font> <font color="#434f54">&#47;&#47; MyAdvertisedDeviceCallbacks</font>
+
+
+<font color="#00979c">void</font> <font color="#5e6d03">setup</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">begin</font><font color="#000000">(</font><font color="#000000">115200</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;Starting Arduino BLE Client application...&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">BLEDevice</font><font color="#434f54">:</font><font color="#434f54">:</font><font color="#000000">init</font><font color="#000000">(</font><font color="#005c5f">&#34;&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+
+ &nbsp;<font color="#434f54">&#47;&#47; Retrieve a Scanner and set the callback we want to use to be informed when we</font>
+ &nbsp;<font color="#434f54">&#47;&#47; have detected a new device. &nbsp;Specify that we want active scanning and start the</font>
+ &nbsp;<font color="#434f54">&#47;&#47; scan to run for 5 seconds.</font>
+ &nbsp;<font color="#000000">BLEScan</font><font color="#434f54">*</font> <font color="#000000">pBLEScan</font> <font color="#434f54">=</font> <font color="#000000">BLEDevice</font><font color="#434f54">:</font><font color="#434f54">:</font><font color="#000000">getScan</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">pBLEScan</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">setAdvertisedDeviceCallbacks</font><font color="#000000">(</font><font color="#00979c">new</font> <font color="#000000">MyAdvertisedDeviceCallbacks</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">pBLEScan</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">setInterval</font><font color="#000000">(</font><font color="#000000">1349</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">pBLEScan</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">setWindow</font><font color="#000000">(</font><font color="#000000">449</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">pBLEScan</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">setActiveScan</font><font color="#000000">(</font><font color="#00979c">true</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">pBLEScan</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">start</font><font color="#000000">(</font><font color="#000000">5</font><font color="#434f54">,</font> <font color="#00979c">false</font><font color="#000000">)</font><font color="#000000">;</font>
+<font color="#000000">}</font> <font color="#434f54">&#47;&#47; End of setup.</font>
+
+
+<font color="#434f54">&#47;&#47; This is the Arduino main loop function.</font>
+<font color="#00979c">void</font> <font color="#5e6d03">loop</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#000000">{</font>
+
+ &nbsp;<font color="#434f54">&#47;&#47; If the flag &#34;doConnect&#34; is true then we have scanned for and found the desired</font>
+ &nbsp;<font color="#434f54">&#47;&#47; BLE Server with which we wish to connect. &nbsp;Now we connect to it. &nbsp;Once we are </font>
+ &nbsp;<font color="#434f54">&#47;&#47; connected we set the connected flag to be true.</font>
+ &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">doConnect</font> <font color="#434f54">==</font> <font color="#00979c">true</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#000000">connectToServer</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;We are now connected to the BLE Server.&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<font color="#000000">}</font> <font color="#5e6d03">else</font> <font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;We have failed to connect to the server; there is nothin more we will do.&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<font color="#000000">}</font>
+ &nbsp;&nbsp;&nbsp;<font color="#000000">doConnect</font> <font color="#434f54">=</font> <font color="#00979c">false</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">}</font>
+
+ &nbsp;<font color="#434f54">&#47;&#47; If we are connected to a peer BLE Server, update the characteristic each time we are reached</font>
+ &nbsp;<font color="#434f54">&#47;&#47; with the current time since boot.</font>
+ &nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#d35400">connected</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;<font color="#00979c">String</font> <font color="#000000">newValue</font> <font color="#434f54">=</font> <font color="#005c5f">&#34;Time since boot: &#34;</font> <font color="#434f54">+</font> <font color="#00979c">String</font><font color="#000000">(</font><font color="#d35400">millis</font><font color="#000000">(</font><font color="#000000">)</font><font color="#434f54">&#47;</font><font color="#000000">1000</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;Setting new characteristic value to \&#34;&#34;</font> <font color="#434f54">+</font> <font color="#000000">newValue</font> <font color="#434f54">+</font> <font color="#005c5f">&#34;\&#34;&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;
+ &nbsp;&nbsp;&nbsp;<font color="#434f54">&#47;&#47; Set the characteristic&#39;s value to be the array of bytes that is actually a string.</font>
+ &nbsp;&nbsp;&nbsp;<font color="#000000">pRemoteCharacteristic</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">writeValue</font><font color="#000000">(</font><font color="#000000">newValue</font><font color="#434f54">.</font><font color="#000000">c_str</font><font color="#000000">(</font><font color="#000000">)</font><font color="#434f54">,</font> <font color="#000000">newValue</font><font color="#434f54">.</font><font color="#d35400">length</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">}</font><font color="#5e6d03">else</font> <font color="#5e6d03">if</font><font color="#000000">(</font><font color="#000000">doScan</font><font color="#000000">)</font><font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;<font color="#000000">BLEDevice</font><font color="#434f54">:</font><font color="#434f54">:</font><font color="#000000">getScan</font><font color="#000000">(</font><font color="#000000">)</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">start</font><font color="#000000">(</font><font color="#000000">0</font><font color="#000000">)</font><font color="#000000">;</font> &nbsp;<font color="#434f54">&#47;&#47; this is just eample to start scan after disconnect, most likely there is better way to do it in arduino</font>
+ &nbsp;<font color="#000000">}</font>
+ &nbsp;
+ &nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">1000</font><font color="#000000">)</font><font color="#000000">;</font> <font color="#434f54">&#47;&#47; Delay a second between loops.</font>
+<font color="#000000">}</font> <font color="#434f54">&#47;&#47; End of loop</font>
+
+</pre>

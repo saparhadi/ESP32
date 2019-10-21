@@ -1,0 +1,67 @@
+<pre>
+<font color="#95a5a6">&#47;*</font>
+<font color="#95a5a6"> &nbsp;&nbsp;&nbsp;Based on Neil Kolban example for IDF: </font><u><font color="#95a5a6">https:&#47;&#47;github.com&#47;nkolban&#47;esp32-snippets&#47;blob&#47;master&#47;cpp_utils&#47;tests&#47;BLE%20Tests&#47;SampleServer.cpp</font></u><font color="#95a5a6"></font>
+<font color="#95a5a6"> &nbsp;&nbsp;&nbsp;Ported to Arduino ESP32 by Evandro Copercini</font>
+<font color="#95a5a6"> &nbsp;&nbsp;&nbsp;updates by chegewara</font>
+<font color="#95a5a6">*&#47;</font>
+
+<font color="#5e6d03">#include</font> <font color="#434f54">&lt;</font><font color="#000000">BLEDevice</font><font color="#434f54">.</font><font color="#000000">h</font><font color="#434f54">&gt;</font>
+<font color="#5e6d03">#include</font> <font color="#434f54">&lt;</font><font color="#000000">BLEUtils</font><font color="#434f54">.</font><font color="#000000">h</font><font color="#434f54">&gt;</font>
+<font color="#5e6d03">#include</font> <font color="#434f54">&lt;</font><font color="#000000">BLEServer</font><font color="#434f54">.</font><font color="#000000">h</font><font color="#434f54">&gt;</font>
+
+<font color="#434f54">&#47;&#47; See the following for generating UUIDs:</font>
+<font color="#434f54">&#47;&#47; </font><u><font color="#434f54">https:&#47;&#47;www.uuidgenerator.net&#47;</font></u><font color="#434f54"></font>
+
+<font color="#5e6d03">#define</font> <font color="#000000">SERVICE_UUID</font> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#005c5f">&#34;1a1a939f-3a3f-42e1-9faf-f20054d23970&#34;</font>
+<font color="#5e6d03">#define</font> <font color="#000000">CHARACTERISTIC_UUID</font> <font color="#005c5f">&#34;11b59585-8af5-4bbd-af39-587e0e982af2&#34;</font>
+
+<font color="#00979c">class</font> <font color="#000000">MyCallbacks</font><font color="#434f54">:</font> <font color="#00979c">public</font> <font color="#000000">BLECharacteristicCallbacks</font> <font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;<font color="#00979c">void</font> <font color="#000000">onWrite</font><font color="#000000">(</font><font color="#000000">BLECharacteristic</font> <font color="#434f54">*</font><font color="#000000">pCharacteristic</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">std</font><font color="#434f54">:</font><font color="#434f54">:</font><font color="#000000">string</font> <font color="#d35400">value</font> <font color="#434f54">=</font> <font color="#000000">pCharacteristic</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">getValue</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#5e6d03">if</font> <font color="#000000">(</font><font color="#d35400">value</font><font color="#434f54">.</font><font color="#d35400">length</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#434f54">&gt;</font> <font color="#000000">0</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;*********&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">print</font><font color="#000000">(</font><font color="#005c5f">&#34;New value: &#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#5e6d03">for</font> <font color="#000000">(</font><font color="#00979c">int</font> <font color="#000000">i</font> <font color="#434f54">=</font> <font color="#000000">0</font><font color="#000000">;</font> <font color="#000000">i</font> <font color="#434f54">&lt;</font> <font color="#d35400">value</font><font color="#434f54">.</font><font color="#d35400">length</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font> <font color="#000000">i</font><font color="#434f54">++</font><font color="#000000">)</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">print</font><font color="#000000">(</font><font color="#d35400">value</font><font color="#000000">[</font><font color="#000000">i</font><font color="#000000">]</font><font color="#000000">)</font><font color="#000000">;</font>
+
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;*********&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">}</font>
+ &nbsp;&nbsp;&nbsp;<font color="#000000">}</font>
+<font color="#000000">}</font><font color="#000000">;</font>
+
+<font color="#00979c">void</font> <font color="#5e6d03">setup</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">begin</font><font color="#000000">(</font><font color="#000000">115200</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;Starting BLE work!&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+
+ &nbsp;<font color="#000000">BLEDevice</font><font color="#434f54">:</font><font color="#434f54">:</font><font color="#000000">init</font><font color="#000000">(</font><font color="#005c5f">&#34;Aye Aye&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">BLEServer</font> <font color="#434f54">*</font><font color="#000000">pServer</font> <font color="#434f54">=</font> <font color="#000000">BLEDevice</font><font color="#434f54">:</font><font color="#434f54">:</font><font color="#000000">createServer</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">BLEService</font> <font color="#434f54">*</font><font color="#000000">pService</font> <font color="#434f54">=</font> <font color="#000000">pServer</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">createService</font><font color="#000000">(</font><font color="#000000">SERVICE_UUID</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">BLECharacteristic</font> <font color="#434f54">*</font><font color="#000000">pCharacteristic</font> <font color="#434f54">=</font> <font color="#000000">pService</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">createCharacteristic</font><font color="#000000">(</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">CHARACTERISTIC_UUID</font><font color="#434f54">,</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">BLECharacteristic</font><font color="#434f54">:</font><font color="#434f54">:</font><font color="#000000">PROPERTY_READ</font> <font color="#434f54">|</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">BLECharacteristic</font><font color="#434f54">:</font><font color="#434f54">:</font><font color="#000000">PROPERTY_WRITE</font>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font color="#000000">)</font><font color="#000000">;</font>
+
+ &nbsp;<font color="#000000">pCharacteristic</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">setCallbacks</font><font color="#000000">(</font><font color="#00979c">new</font> <font color="#000000">MyCallbacks</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">)</font><font color="#000000">;</font>
+
+ &nbsp;<font color="#000000">pCharacteristic</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">setValue</font><font color="#000000">(</font><font color="#005c5f">&#34;Halo halo Bandung, disini Ade dan Hadi&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">pService</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">start</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;
+ &nbsp;<font color="#434f54">&#47;&#47; BLEAdvertising *pAdvertising = pServer-&gt;getAdvertising(); &nbsp;&#47;&#47; this still is working for backward compatibility</font>
+ &nbsp;<font color="#000000">BLEAdvertising</font> <font color="#434f54">*</font><font color="#000000">pAdvertising</font> <font color="#434f54">=</font> <font color="#000000">BLEDevice</font><font color="#434f54">:</font><font color="#434f54">:</font><font color="#000000">getAdvertising</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">pAdvertising</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">addServiceUUID</font><font color="#000000">(</font><font color="#000000">SERVICE_UUID</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">pAdvertising</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">setScanResponse</font><font color="#000000">(</font><font color="#00979c">true</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">pAdvertising</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">setMinPreferred</font><font color="#000000">(</font><font color="#000000">0x06</font><font color="#000000">)</font><font color="#000000">;</font> &nbsp;<font color="#434f54">&#47;&#47; functions that help with iPhone connections issue</font>
+ &nbsp;<font color="#000000">pAdvertising</font><font color="#434f54">-</font><font color="#434f54">&gt;</font><font color="#000000">setMinPreferred</font><font color="#000000">(</font><font color="#000000">0x12</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<font color="#000000">BLEDevice</font><font color="#434f54">:</font><font color="#434f54">:</font><font color="#000000">startAdvertising</font><font color="#000000">(</font><font color="#000000">)</font><font color="#000000">;</font>
+ &nbsp;<b><font color="#d35400">Serial</font></b><font color="#434f54">.</font><font color="#d35400">println</font><font color="#000000">(</font><font color="#005c5f">&#34;Characteristic defined! Now you can read it in your phone!&#34;</font><font color="#000000">)</font><font color="#000000">;</font>
+<font color="#000000">}</font>
+
+<font color="#00979c">void</font> <font color="#5e6d03">loop</font><font color="#000000">(</font><font color="#000000">)</font> <font color="#000000">{</font>
+ &nbsp;<font color="#434f54">&#47;&#47; put your main code here, to run repeatedly:</font>
+ &nbsp;<font color="#d35400">delay</font><font color="#000000">(</font><font color="#000000">2000</font><font color="#000000">)</font><font color="#000000">;</font>
+<font color="#000000">}</font>
+
+</pre>
