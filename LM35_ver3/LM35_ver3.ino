@@ -13,7 +13,7 @@ void setup() {
 void loop() {
 
   RawValue = analogRead(analogIn);
-  Voltage = (RawValue*5000)/4095; // with 5V input
+  Voltage = (RawValue/4095)*3300; // with 5V input
   tempC = Voltage*0.1;
   tempF = (tempC * 1.8) + 32; // convert to F
 
