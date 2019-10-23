@@ -6,7 +6,7 @@ TinyGPSPlus gps;
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial2.begin(GPSBaud, SERIAL_8N1, RXPin, TXPin);
   delay(1000);
   Serial.println("Test!");
