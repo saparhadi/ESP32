@@ -1,12 +1,12 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 // Replace the next variables with your SSID/Password combination
-const char* ssid = "kondrong";
-const char* password = "kondrong123";
+const char* ssid = "kondrong"; //Your WIFI NAME/SSID
+const char* password = "kondrong123"; //YOUR WIFI PASSWORD
 
 // Add your MQTT Broker IP address, example:
 //const char* mqtt_server = "192.168.1.144";
-const char* mqtt_server = "192.168.100.250";
+const char* mqtt_server = "192.168.100.250"; //IP Laptop
 WiFiClient espClient;
 PubSubClient client(espClient);
 long lastMsg = 0;
@@ -21,6 +21,7 @@ const int ledPin = 4;
 
 // LM35 Pin
 const int lm35Pin = 34;
+
 void setup() {
   Serial.begin(115200);
   // default settings
