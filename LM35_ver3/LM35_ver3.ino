@@ -1,4 +1,4 @@
-const int analogIn = 4;
+const int analogIn = 34;
 
 float RawValue;
 float Voltage = 0;
@@ -13,7 +13,7 @@ void setup() {
 void loop() {
 
   RawValue = analogRead(analogIn);
-  Voltage = (RawValue/4095)*3300; // with 5V input
+  Voltage = (RawValue/4095)*3300; // with 3.3V input
   tempC = Voltage*0.1;
   tempF = (tempC * 1.8) + 32; // convert to F
 
