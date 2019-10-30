@@ -51,8 +51,8 @@ void loop()
   
   root["pot "] = String(potentioValue);
   root["lux "] = String(ldrValue);
-  root["C "] = String(Temp);
-  root["C* "] = String(IntTemp);
+  root["C (LM35) "] = String(Temp);
+  root["C (IntTemp) "] = String(IntTemp);
   root["info"] = String(info);
   
   root.printTo(data);
