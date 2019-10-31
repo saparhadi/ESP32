@@ -84,7 +84,7 @@ void setup() {
   esp_sleep_enable_touchpad_wakeup();
 
   //Go to sleep now
-  delay(3000);
+  delay(3000); //Waktu sebelum deep sleep lagi
   Serial.println("Going to sleep now");
   esp_deep_sleep_start();
   Serial.println("This will never be printed");
