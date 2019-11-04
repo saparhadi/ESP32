@@ -3,6 +3,7 @@
 
 #define led 2
 
+// for internal temp sensor reading
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -12,9 +13,10 @@ uint8_t temprature_sens_read();
 #endif
 uint8_t temprature_sens_read();
 
-const char* ssid = "Saparhadi";
-const char* password = "ahahahaha";
-const char* mqtt_server = "192.168.43.142";
+// Wifi setting
+const char* ssid = "kondrong";
+const char* password = "kondrong123";
+const char* mqtt_server = "192.168.100.250"; // your laptop IP, where mqtt server running
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -117,6 +119,7 @@ void loop() {
   }
 }
 
+// Parsing json, to send with mqtt protocol
 String buildJson() {
   String data = "{";
   data += "\n";
